@@ -1,11 +1,8 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100">
-  <!-- AC Unit body -->
-  <rect x="10" y="25" width="80" height="40" rx="8" ry="8" fill="#fff"/>
-  <!-- Vent slats -->
-  <rect x="15" y="52" width="70" height="6" rx="3" ry="3" fill="#fff" opacity="0.4"/>
-  <!-- Airflow lines -->
-  <line x1="30" y1="72" x2="30" y2="82" stroke="#fff" stroke-width="2.5" stroke-linecap="round"/>
-  <line x1="45" y1="72" x2="45" y2="85" stroke="#fff" stroke-width="2.5" stroke-linecap="round"/>
-  <line x1="60" y1="72" x2="60" y2="82" stroke="#fff" stroke-width="2.5" stroke-linecap="round"/>
-  <line x1="75" y1="72" x2="75" y2="85" stroke="#fff" stroke-width="2.5" stroke-linecap="round"/>
+  <rect x="10" y="25" width="80" height="40" rx="8" ry="8" fill="white" stroke="#1a6fa0" stroke-width="2"/>
+  <rect x="15" y="52" width="70" height="6" rx="3" ry="3" fill="#1a6fa0" opacity="0.4"/>
+  <line x1="30" y1="72" x2="30" y2="82" stroke="#2E96D0" stroke-width="2.5" stroke-linecap="round"/>
+  <line x1="45" y1="72" x2="45" y2="85" stroke="#2E96D0" stroke-width="2.5" stroke-linecap="round"/>
+  <line x1="60" y1="72" x2="60" y2="82" stroke="#2E96D0" stroke-width="2.5" stroke-linecap="round"/>
+  <line x1="75" y1="72" x2="75" y2="85" stroke="#2E96D0" stroke-width="2.5" stroke-linecap="round"/>
 </svg>
