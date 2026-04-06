@@ -114,10 +114,7 @@
           ]
         }
       ],
-      "images": {
-        "small": "/drivers/aircon/assets/icon.svg",
-        "large": "/drivers/aircon/assets/icon.svg"
-      }
+      "icon": "/drivers/aircon/assets/icon.svg"
     }
   ],
   "capabilities": {
