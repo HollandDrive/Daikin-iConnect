@@ -3,8 +3,6 @@
 const Homey = require('homey');
 const DaikinApi = require('../../lib/DaikinApi');
 
-const DEFAULT_POLL_INTERVAL = 15000;
-
 class AirconDevice extends Homey.Device {
   async onInit() {
     this.log('Daikin device initialized:', this.getName());
@@ -12,7 +10,6 @@ class AirconDevice extends Homey.Device {
     const { ip, key, poll_interval } = this.getSettings();
     this.api = new DaikinApi({ ip, key, log: this.log.bind(this) });
 
-    // Register capability listeners
     this.registerCapabilityListener('thermostat_mode', async (value) => {
       this.log('Set mode:', value);
       await this.api.setMode(value);
@@ -37,34 +34,38 @@ class AirconDevice extends Homey.Device {
       await this._pollState();
     });
 
-    this.registerCapabilityListener('powerful_mode', async (value) => {
-      this.log('Set powerful mode:', value);
-      if (value && this.getCapabilityValue('econo_mode')) {
-        await this.setCapabilityValue('econo_mode', false).catch(this.error);
-      }
-      await this.api.setPowerful(value);
-      await this._pollState();
-    });
+    if (this.hasCapability('daikin_powerful')) {
+      this.registerCapabilityListener('daikin_powerful', async (value) => {
+        this.log('Set powerful mode:', value);
+        if (value && this.hasCapability('daikin_econo') && this.getCapabilityValue('daikin_econo')) {
+          await this.setCapabilityValue('daikin_econo', false).catch(this.error);
+        }
+        await this.api.setPowerful(value);
+        await this._pollState();
+      });
+    }
 
-    this.registerCapabilityListener('econo_mode', async (value) => {
-      this.log('Set econo mode:', value);
-      if (value && this.getCapabilityValue('powerful_mode')) {
-        await this.setCapabilityValue('powerful_mode', false).catch(this.error);
-      }
-      await this.api.setEcono(value);
-      await this._pollState();
-    });
+    if (this.hasCapability('daikin_econo')) {
+      this.registerCapabilityListener('daikin_econo', async (value) => {
+        this.log('Set econo mode:', value);
+        if (value && this.hasCapability('daikin_powerful') && this.getCapabilityValue('daikin_powerful')) {
+          await this.setCapabilityValue('daikin_powerful', false).catch(this.error);
+        }
+        await this.api.setEcono(value);
+        await this._pollState();
+      });
+    }
 
-    this.registerCapabilityListener('streamer_mode', async (value) => {
-      this.log('Set streamer mode:', value);
-      await this.api.setStreamer(value);
-      await this._pollState();
-    });
+    if (this.hasCapability('daikin_streamer')) {
+      this.registerCapabilityListener('daikin_streamer', async (value) => {
+        this.log('Set streamer mode:', value);
+        await this.api.setStreamer(value);
+        await this._pollState();
+      });
+    }
 
-    // Initial state fetch
     await this._pollState();
 
-    // Start polling
     const interval = (poll_interval || 15) * 1000;
     this._pollInterval = this.homey.setInterval(() => {
       this._pollState().catch((err) => {
@@ -93,9 +94,16 @@ class AirconDevice extends Homey.Device {
 
       await this.setCapabilityValue('fan_speed', state.fanSpeed).catch(this.error);
       await this.setCapabilityValue('swing_mode', state.swingMode).catch(this.error);
-      await this.setCapabilityValue('powerful_mode', state.powerful).catch(this.error);
-      await this.setCapabilityValue('econo_mode', state.econo).catch(this.error);
-      await this.setCapabilityValue('streamer_mode', state.streamer).catch(this.error);
+
+      if (this.hasCapability('daikin_powerful')) {
+        await this.setCapabilityValue('daikin_powerful', state.powerful).catch(this.error);
+      }
+      if (this.hasCapability('daikin_econo')) {
+        await this.setCapabilityValue('daikin_econo', state.econo).catch(this.error);
+      }
+      if (this.hasCapability('daikin_streamer')) {
+        await this.setCapabilityValue('daikin_streamer', state.streamer).catch(this.error);
+      }
 
       if (!this.getAvailable()) {
         await this.setAvailable();

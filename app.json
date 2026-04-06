@@ -34,9 +34,8 @@
         "measure_temperature.outside",
         "fan_speed",
         "swing_mode",
-        "powerful_mode",
-        "econo_mode",
-        "streamer_mode"
+        "daikin_powerful",
+        "daikin_econo"
       ],
       "capabilitiesOptions": {
         "thermostat_mode": {
@@ -132,7 +131,8 @@
       ],
       "getable": true,
       "setable": true,
-      "uiComponent": "picker"
+      "uiComponent": "picker",
+      "uiQuickAction": false
     },
     "swing_mode": {
       "type": "enum",
@@ -145,9 +145,10 @@
       ],
       "getable": true,
       "setable": true,
-      "uiComponent": "picker"
+      "uiComponent": "picker",
+      "uiQuickAction": false
     },
-    "powerful_mode": {
+    "daikin_powerful": {
       "type": "boolean",
       "title": { "en": "Powerful" },
       "getable": true,
@@ -155,7 +156,7 @@
       "uiComponent": "toggle",
       "icon": "/assets/icons/powerful.svg"
     },
-    "econo_mode": {
+    "daikin_econo": {
       "type": "boolean",
       "title": { "en": "Economy" },
       "getable": true,
@@ -163,7 +164,7 @@
       "uiComponent": "toggle",
       "icon": "/assets/icons/econo.svg"
     },
-    "streamer_mode": {
+    "daikin_streamer": {
       "type": "boolean",
       "title": { "en": "Streamer" },
       "getable": true,
