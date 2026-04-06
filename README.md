@@ -1,5 +1,7 @@
 # Daikin iConnect for Homey
 
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
+
 Direct local control for Daikin air conditioners with encrypted C-type WiFi adapters. No cloud required.
 
 ## Supported Adapters
