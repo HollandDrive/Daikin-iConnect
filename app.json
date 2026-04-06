@@ -1,0 +1,178 @@
+{
+  "id": "com.daikin.brp072c",
+  "version": "1.1.0",
+  "compatibility": ">=5.0.0",
+  "platforms": ["local"],
+  "sdk": 3,
+  "name": {
+    "en": "Daikin iConnect"
+  },
+  "description": {
+    "en": "Direct local control for Daikin air conditioners with encrypted C-type WiFi adapters (BRP069C/BRP072C). No cloud required. Supports iSmile and other models."
+  },
+  "category": ["climate"],
+  "brandColor": "#2E96D0",
+  "permissions": [],
+  "images": {
+    "small": "/assets/images/small.png",
+    "large": "/assets/images/large.png"
+  },
+  "author": {
+    "name": "Jarryd Anderson"
+  },
+  "drivers": [
+    {
+      "id": "aircon",
+      "name": {
+        "en": "Daikin Aircon"
+      },
+      "class": "thermostat",
+      "capabilities": [
+        "thermostat_mode",
+        "target_temperature",
+        "measure_temperature",
+        "measure_temperature.outside",
+        "fan_speed",
+        "swing_mode",
+        "powerful_mode",
+        "econo_mode",
+        "streamer_mode"
+      ],
+      "capabilitiesOptions": {
+        "thermostat_mode": {
+          "values": [
+            { "id": "off", "title": { "en": "Off" } },
+            { "id": "cool", "title": { "en": "Cool" } },
+            { "id": "heat", "title": { "en": "Heat" } },
+            { "id": "auto", "title": { "en": "Auto" } },
+            { "id": "dry", "title": { "en": "Dry" } },
+            { "id": "fan", "title": { "en": "Fan" } }
+          ]
+        },
+        "target_temperature": {
+          "min": 16,
+          "max": 32,
+          "step": 0.5
+        },
+        "measure_temperature": {
+          "title": { "en": "Indoor Temperature" }
+        },
+        "measure_temperature.outside": {
+          "title": { "en": "Outdoor Temperature" }
+        }
+      },
+      "pair": [
+        {
+          "id": "configure",
+          "template": "login_credentials",
+          "options": {
+            "logo": "/drivers/aircon/assets/icon.svg",
+            "title": { "en": "Daikin Aircon" },
+            "usernameLabel": { "en": "IP Address" },
+            "usernamePlaceholder": { "en": "192.168.x.x" },
+            "passwordLabel": { "en": "API Key" },
+            "passwordPlaceholder": { "en": "Enter your Daikin API key" }
+          }
+        },
+        {
+          "id": "list_devices",
+          "template": "list_devices",
+          "navigation": {
+            "next": "add_devices"
+          }
+        },
+        {
+          "id": "add_devices",
+          "template": "add_devices"
+        }
+      ],
+      "settings": [
+        {
+          "type": "group",
+          "label": { "en": "Connection" },
+          "children": [
+            {
+              "id": "ip",
+              "type": "text",
+              "label": { "en": "IP Address" },
+              "value": ""
+            },
+            {
+              "id": "key",
+              "type": "password",
+              "label": { "en": "API Key" },
+              "value": ""
+            },
+            {
+              "id": "poll_interval",
+              "type": "number",
+              "label": { "en": "Poll Interval (seconds)" },
+              "value": 15,
+              "min": 5,
+              "max": 60
+            }
+          ]
+        }
+      ],
+      "images": {
+        "small": "/drivers/aircon/assets/icon.svg",
+        "large": "/drivers/aircon/assets/icon.svg"
+      }
+    }
+  ],
+  "capabilities": {
+    "fan_speed": {
+      "type": "enum",
+      "title": { "en": "Fan Speed" },
+      "values": [
+        { "id": "auto", "title": { "en": "Auto" } },
+        { "id": "silence", "title": { "en": "Silence" } },
+        { "id": "1", "title": { "en": "1" } },
+        { "id": "2", "title": { "en": "2" } },
+        { "id": "3", "title": { "en": "3" } },
+        { "id": "4", "title": { "en": "4" } },
+        { "id": "5", "title": { "en": "5" } }
+      ],
+      "getable": true,
+      "setable": true,
+      "uiComponent": "picker"
+    },
+    "swing_mode": {
+      "type": "enum",
+      "title": { "en": "Swing Mode" },
+      "values": [
+        { "id": "off", "title": { "en": "Off" } },
+        { "id": "vertical", "title": { "en": "Vertical" } },
+        { "id": "horizontal", "title": { "en": "Horizontal" } },
+        { "id": "both", "title": { "en": "3D" } }
+      ],
+      "getable": true,
+      "setable": true,
+      "uiComponent": "picker"
+    },
+    "powerful_mode": {
+      "type": "boolean",
+      "title": { "en": "Powerful" },
+      "getable": true,
+      "setable": true,
+      "uiComponent": "toggle",
+      "icon": "/assets/icons/powerful.svg"
+    },
+    "econo_mode": {
+      "type": "boolean",
+      "title": { "en": "Economy" },
+      "getable": true,
+      "setable": true,
+      "uiComponent": "toggle",
+      "icon": "/assets/icons/econo.svg"
+    },
+    "streamer_mode": {
+      "type": "boolean",
+      "title": { "en": "Streamer" },
+      "getable": true,
+      "setable": true,
+      "uiComponent": "toggle",
+      "icon": "/assets/icons/streamer.svg"
+    }
+  }
+}

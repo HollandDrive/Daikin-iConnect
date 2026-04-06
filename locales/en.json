@@ -1,0 +1,8 @@
+{
+  "pair": {
+    "configure": {
+      "title": "Configure Daikin Aircon",
+      "subtitle": "Enter the IP address and API key of your Daikin unit"
+    }
+  }
+}
