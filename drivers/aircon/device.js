@@ -12,7 +12,8 @@ class AirconDevice extends Homey.Device {
 
     this.registerCapabilityListener('thermostat_mode', async (value) => {
       this.log('Set mode:', value);
-      await this.api.setMode(value);
+      const apiMode = this._toApiMode(value);
+      await this.api.setMode(apiMode);
       await this._pollState();
     });
 
@@ -77,11 +78,21 @@ class AirconDevice extends Homey.Device {
     this.log('Daikin device ready');
   }
 
+  _toApiMode(homeyMode) {
+    const map = { heatcool: 'auto', fan_only: 'fan' };
+    return map[homeyMode] || homeyMode;
+  }
+
+  _toHomeyMode(apiMode) {
+    const map = { auto: 'heatcool', fan: 'fan_only' };
+    return map[apiMode] || apiMode;
+  }
+
   async _pollState() {
     try {
       const state = await this.api.getState();
 
-      await this.setCapabilityValue('thermostat_mode', state.mode).catch(this.error);
+      await this.setCapabilityValue('thermostat_mode', this._toHomeyMode(state.mode)).catch(this.error);
       await this.setCapabilityValue('target_temperature', state.targetTemperature).catch(this.error);
 
       if (state.currentTemperature !== null) {
