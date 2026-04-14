@@ -40,6 +40,86 @@ The API key is printed on a sticker on the WiFi adapter module inside your indoo
 - The Daikin must have a **static IP** (DHCP is not recommended)
 - Port **443** must be accessible between Homey and the Daikin
 
+## Google Home Voice Control
+
+This app uses the `thermostat` device class for Google Home compatibility. The following voice commands work **natively**:
+
+| Command | Example |
+|---|---|
+| Set mode | "Hey Google, set the Office Aircon to cool" |
+| Set mode off | "Hey Google, set the Office Aircon to off" |
+| Query temperature | "Hey Google, what is the temperature of the Office Aircon?" |
+
+### Limitations (Homey Self-Hosted)
+
+Due to how Homey's cloud bridge communicates with Google Home, some commands **do not work natively** and require Google Home Routines/Automations as workarounds:
+
+| Command | Issue | Workaround |
+|---|---|---|
+| "Turn on the Aircon" | Google sends OnOff trait, which Homey's bridge ignores for thermostat devices | Create a Google Home automation that maps "Turn on the [name]" to `ThermostatSetMode: cool` |
+| "Turn off the Aircon" | Same OnOff trait issue | Create a Google Home automation that maps "Turn off the [name]" to `ThermostatSetMode: off` |
+| "Set temperature to 24" | Temperature EXECUTE commands never reach Homey through the bridge (app slider works fine) | Create a Google Home automation for each temperature value |
+
+### Setting Up Google Home Automations
+
+Use the Google Home Script Editor at [home.google.com](https://home.google.com) to create automations. **Important:** Due to a Google bug, each voice command must be a separate script — multiple `assistant.event.OkGoogle` starters in one script will only trigger the first one.
+
+**Turn on (sets mode to cool):**
+
+```yaml
+metadata:
+  name: Office Aircon On
+  description: Turn on the office aircon
+automations:
+  - starters:
+      - type: assistant.event.OkGoogle
+        eventData: query
+        is: "Turn on the office aircon"
+    actions:
+      - type: device.command.ThermostatSetMode
+        devices:
+          - Office Aircon - Office
+        thermostatMode: cool
+```
+
+**Turn off:**
+
+```yaml
+metadata:
+  name: Office Aircon Off
+  description: Turn off the office aircon
+automations:
+  - starters:
+      - type: assistant.event.OkGoogle
+        eventData: query
+        is: "Turn off the office aircon"
+    actions:
+      - type: device.command.ThermostatSetMode
+        devices:
+          - Office Aircon - Office
+        thermostatMode: "off"
+```
+
+**Set temperature (one script per value):**
+
+```yaml
+metadata:
+  name: Office Aircon 24
+  description: Set the office aircon to 24
+automations:
+  - starters:
+      - type: assistant.event.OkGoogle
+        eventData: query
+        is: "Set the office aircon to 24"
+    actions:
+      - type: device.command.ThermostatTemperatureSetpoint
+        devices:
+          - Office Aircon - Office
+        thermostatTemperatureSetpoint: 24C
+```
+
+Replace `Office Aircon - Office` with your device's `Device Name - Room` as shown in Google Home.
+
 ## How It Works
 
 This app communicates directly with your Daikin's encrypted local API over HTTPS. It uses the same protocol as Home Assistant's Daikin integration (pydaikin), ported to Node.js for Homey.
