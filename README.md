@@ -62,7 +62,7 @@ Due to how Homey's cloud bridge communicates with Google Home, some commands **d
 
 ### Setting Up Google Home Automations
 
-Use the Google Home Script Editor at [home.google.com](https://home.google.com) to create automations. **Important:** Due to a Google bug, each voice command must be a separate script — multiple `assistant.event.OkGoogle` starters in one script will only trigger the first one.
+Create automations using either the **Google Home app** (Automations tab) or the **Script Editor** at [home.google.com](https://home.google.com). **Important:** Due to a Google bug, each voice command must be a separate script — multiple `assistant.event.OkGoogle` starters in one script will only trigger the first one.
 
 **Turn on (sets mode to cool):**
 
