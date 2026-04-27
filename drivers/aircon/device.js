@@ -14,25 +14,21 @@ class AirconDevice extends Homey.Device {
       this.log('Set mode:', value);
       const apiMode = this._toApiMode(value);
       await this.api.setMode(apiMode);
-      await this._pollState();
     });
 
     this.registerCapabilityListener('target_temperature', async (value) => {
       this.log('Set target temperature:', value);
       await this.api.setTargetTemperature(value);
-      await this._pollState();
     });
 
     this.registerCapabilityListener('fan_speed', async (value) => {
       this.log('Set fan speed:', value);
       await this.api.setFanSpeed(value);
-      await this._pollState();
     });
 
     this.registerCapabilityListener('swing_mode', async (value) => {
       this.log('Set swing mode:', value);
       await this.api.setSwingMode(value);
-      await this._pollState();
     });
 
     if (this.hasCapability('daikin_powerful')) {
@@ -42,7 +38,6 @@ class AirconDevice extends Homey.Device {
           await this.setCapabilityValue('daikin_econo', false).catch(this.error);
         }
         await this.api.setPowerful(value);
-        await this._pollState();
       });
     }
 
@@ -53,7 +48,6 @@ class AirconDevice extends Homey.Device {
           await this.setCapabilityValue('daikin_powerful', false).catch(this.error);
         }
         await this.api.setEcono(value);
-        await this._pollState();
       });
     }
 
@@ -61,7 +55,6 @@ class AirconDevice extends Homey.Device {
       this.registerCapabilityListener('daikin_streamer', async (value) => {
         this.log('Set streamer mode:', value);
         await this.api.setStreamer(value);
-        await this._pollState();
       });
     }
 
