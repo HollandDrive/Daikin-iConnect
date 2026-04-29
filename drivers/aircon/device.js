@@ -3,7 +3,7 @@
 const Homey = require('homey');
 const DaikinApi = require('../../lib/DaikinApi');
 
-const WRITE_GUARD_MS = 15000;
+const WRITE_GUARD_MS = 5000;
 
 class AirconDevice extends Homey.Device {
   async onInit() {
