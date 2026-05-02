@@ -126,6 +126,17 @@ This app communicates directly with your Daikin's encrypted local API over HTTPS
 
 No cloud services, no external dependencies, no account required.
 
+## Design Notes
+
+The BRP072C is a slow, single-threaded embedded HTTPS server with a 1–2 s commit lag (longer for the first call after idle). Hitting it naively from a Homey app produces several annoying symptoms — modes silently reverting after a write, "Some actions may not have started" from Google Home, AC physically blipping on for ~1 s then turning back off. The app contains four deliberate workarounds for these:
+
+1. **No post-write poll inside capability listeners.** The Homey SDK auto-applies the listener's `value` on success; re-reading the device immediately after a write would race the commit lag and overwrite the just-set capability with stale data. (Same pattern pydaikin uses upstream.)
+2. **Write guard on the periodic poll.** Each capability listener stamps `_lastWriteAt`; the periodic `_pollState` skips writing controllable capabilities (mode/temp/fan/swing/special-mode) within `WRITE_GUARD_MS` of the last user write. Sensor capabilities (`measure_temperature`, `measure_temperature.outside`) always update.
+3. **Serialised + batched `setControlInfo`.** The BRP072C's `set_control_info` requires all six fields in one query string. Voice commands like "turn on" arrive as two PUTs (mode + setpoint) ~10 ms apart; without serialisation they race through the shared cache and clobber each other. The fix is a per-instance promise queue **plus** a 50 ms collection window that coalesces near-simultaneous calls into one HTTP write — taking combined commands from ~3 s to ~700 ms.
+4. **`keepAlive` on the `https.Agent`.** The legacy TLS handshake the BRP072C requires (`SSL_OP_LEGACY_SERVER_CONNECT`) is expensive on its slow CPU. Reusing the TCP socket saves ~100–300 ms per HTTPS call after the first.
+
+If you fork this app for a different Daikin adapter family or another quirky embedded HTTPS device, those four patterns are likely to apply unchanged.
+
 ## Credits
 
 Protocol based on [pydaikin](https://github.com/fredrike/pydaikin) by Fredrik Erlandsson.
