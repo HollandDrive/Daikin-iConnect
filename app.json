@@ -1,6 +1,6 @@
 {
   "id": "com.daikin.brp072c",
-  "version": "1.1.0",
+  "version": "1.2.0",
   "compatibility": ">=12.0.0",
   "platforms": ["local"],
   "sdk": 3,
@@ -42,13 +42,16 @@
           "values": [
             { "id": "off", "title": { "en": "Off" } },
             { "id": "cool", "title": { "en": "Cool" } },
-            { "id": "heat", "title": { "en": "Heat" } }
+            { "id": "heat", "title": { "en": "Heat" } },
+            { "id": "dry", "title": { "en": "Dry" } },
+            { "id": "heatcool", "title": { "en": "Auto" } },
+            { "id": "fan_only", "title": { "en": "Fan Only" } }
           ]
         },
         "target_temperature": {
           "min": 16,
           "max": 32,
-          "step": 0.5,
+          "step": 1,
           "units": "C"
         },
         "measure_temperature": {
@@ -114,6 +117,59 @@
       "icon": "/drivers/aircon/assets/icon.svg"
     }
   ],
+  "flow": {
+    "actions": [
+      {
+        "id": "set_fan_speed",
+        "title": { "en": "Set fan speed" },
+        "titleFormatted": { "en": "Set fan speed to [[fan_speed]]" },
+        "args": [
+          {
+            "type": "device",
+            "name": "device",
+            "filter": "driver_id=aircon"
+          },
+          {
+            "type": "dropdown",
+            "name": "fan_speed",
+            "title": { "en": "Fan Speed" },
+            "values": [
+              { "id": "auto", "title": { "en": "Auto" } },
+              { "id": "silence", "title": { "en": "Silence" } },
+              { "id": "1", "title": { "en": "1" } },
+              { "id": "2", "title": { "en": "2" } },
+              { "id": "3", "title": { "en": "3" } },
+              { "id": "4", "title": { "en": "4" } },
+              { "id": "5", "title": { "en": "5 (Max)" } }
+            ]
+          }
+        ]
+      },
+      {
+        "id": "set_swing_mode",
+        "title": { "en": "Set vane swing" },
+        "titleFormatted": { "en": "Set vane swing to [[swing_mode]]" },
+        "args": [
+          {
+            "type": "device",
+            "name": "device",
+            "filter": "driver_id=aircon"
+          },
+          {
+            "type": "dropdown",
+            "name": "swing_mode",
+            "title": { "en": "Vane Swing" },
+            "values": [
+              { "id": "off", "title": { "en": "Off" } },
+              { "id": "vertical", "title": { "en": "Vertical" } },
+              { "id": "horizontal", "title": { "en": "Horizontal" } },
+              { "id": "both", "title": { "en": "3D (Both)" } }
+            ]
+          }
+        ]
+      }
+    ]
+  },
   "capabilities": {
     "fan_speed": {
       "type": "enum",

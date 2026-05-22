@@ -4,6 +4,7 @@ const Homey = require('homey');
 const DaikinApi = require('../../lib/DaikinApi');
 
 const WRITE_GUARD_MS = 5000;
+const POLL_FAILURE_THRESHOLD = 3;
 
 class AirconDevice extends Homey.Device {
   async onInit() {
@@ -12,6 +13,16 @@ class AirconDevice extends Homey.Device {
     const { ip, key, poll_interval } = this.getSettings();
     this.api = new DaikinApi({ ip, key, log: this.log.bind(this) });
     this._lastWriteAt = 0;
+    this._pollFailures = 0;
+
+    // Migration: add special-mode capabilities to devices paired before
+    // the en_spmode model-detect gate worked correctly.
+    if (!this.hasCapability('daikin_powerful')) {
+      await this.addCapability('daikin_powerful').catch(this.error);
+    }
+    if (!this.hasCapability('daikin_econo')) {
+      await this.addCapability('daikin_econo').catch(this.error);
+    }
 
     this.registerCapabilityListener('thermostat_mode', async (value) => {
       this._lastWriteAt = Date.now();
@@ -22,8 +33,10 @@ class AirconDevice extends Homey.Device {
 
     this.registerCapabilityListener('target_temperature', async (value) => {
       this._lastWriteAt = Date.now();
-      this.log('Set target temperature:', value);
-      await this.api.setTargetTemperature(value);
+      // BRP072C units don't accept half-degree setpoints; round to integer before sending.
+      const rounded = Math.round(value);
+      this.log('Set target temperature:', rounded);
+      await this.api.setTargetTemperature(rounded);
     });
 
     this.registerCapabilityListener('fan_speed', async (value) => {
@@ -38,27 +51,27 @@ class AirconDevice extends Homey.Device {
       await this.api.setSwingMode(value);
     });
 
-    if (this.hasCapability('daikin_powerful')) {
-      this.registerCapabilityListener('daikin_powerful', async (value) => {
-        this._lastWriteAt = Date.now();
-        this.log('Set powerful mode:', value);
-        if (value && this.hasCapability('daikin_econo') && this.getCapabilityValue('daikin_econo')) {
-          await this.setCapabilityValue('daikin_econo', false).catch(this.error);
-        }
-        await this.api.setPowerful(value);
-      });
-    }
+    // Listener registration is unconditional — all devices now have these
+    // capabilities after the onInit migration block above. Wrapping the
+    // listener registration in `if (hasCapability(...))` can race the
+    // addCapability await on first init and silently skip registration.
+    this.registerCapabilityListener('daikin_powerful', async (value) => {
+      this._lastWriteAt = Date.now();
+      this.log('Set powerful mode:', value);
+      if (value && this.hasCapability('daikin_econo') && this.getCapabilityValue('daikin_econo')) {
+        await this.setCapabilityValue('daikin_econo', false).catch(this.error);
+      }
+      await this.api.setPowerful(value);
+    });
 
-    if (this.hasCapability('daikin_econo')) {
-      this.registerCapabilityListener('daikin_econo', async (value) => {
-        this._lastWriteAt = Date.now();
-        this.log('Set econo mode:', value);
-        if (value && this.hasCapability('daikin_powerful') && this.getCapabilityValue('daikin_powerful')) {
-          await this.setCapabilityValue('daikin_powerful', false).catch(this.error);
-        }
-        await this.api.setEcono(value);
-      });
-    }
+    this.registerCapabilityListener('daikin_econo', async (value) => {
+      this._lastWriteAt = Date.now();
+      this.log('Set econo mode:', value);
+      if (value && this.hasCapability('daikin_powerful') && this.getCapabilityValue('daikin_powerful')) {
+        await this.setCapabilityValue('daikin_powerful', false).catch(this.error);
+      }
+      await this.api.setEcono(value);
+    });
 
     if (this.hasCapability('daikin_streamer')) {
       this.registerCapabilityListener('daikin_streamer', async (value) => {
@@ -72,10 +85,7 @@ class AirconDevice extends Homey.Device {
 
     const interval = (poll_interval || 15) * 1000;
     this._pollInterval = this.homey.setInterval(() => {
-      this._pollState().catch((err) => {
-        this.log('Poll error:', err.message);
-        this.setUnavailable(err.message).catch(this.error);
-      });
+      this._pollState().catch((err) => this._onPollFailure(err));
     }, interval);
 
     this.log('Daikin device ready');
@@ -121,12 +131,21 @@ class AirconDevice extends Homey.Device {
         }
       }
 
+      this._pollFailures = 0;
       if (!this.getAvailable()) {
         await this.setAvailable();
       }
     } catch (err) {
       this.log('Failed to poll state:', err.message);
       throw err;
+    }
+  }
+
+  _onPollFailure(err) {
+    this._pollFailures = (this._pollFailures || 0) + 1;
+    this.log(`Poll error (${this._pollFailures}/${POLL_FAILURE_THRESHOLD}):`, err.message);
+    if (this._pollFailures >= POLL_FAILURE_THRESHOLD) {
+      this.setUnavailable(err.message).catch(this.error);
     }
   }
 
@@ -145,10 +164,7 @@ class AirconDevice extends Homey.Device {
       }
       const interval = (newSettings.poll_interval || 15) * 1000;
       this._pollInterval = this.homey.setInterval(() => {
-        this._pollState().catch((err) => {
-          this.log('Poll error:', err.message);
-          this.setUnavailable(err.message).catch(this.error);
-        });
+        this._pollState().catch((err) => this._onPollFailure(err));
       }, interval);
     }
   }

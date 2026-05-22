@@ -6,6 +6,16 @@ const DaikinApi = require('../../lib/DaikinApi');
 class AirconDriver extends Homey.Driver {
   async onInit() {
     this.log('Daikin Aircon driver initialized');
+
+    this.homey.flow.getActionCard('set_fan_speed')
+      .registerRunListener(async ({ device, fan_speed }) => {
+        await device.triggerCapabilityListener('fan_speed', fan_speed);
+      });
+
+    this.homey.flow.getActionCard('set_swing_mode')
+      .registerRunListener(async ({ device, swing_mode }) => {
+        await device.triggerCapabilityListener('swing_mode', swing_mode);
+      });
   }
 
   async onPairListDevices() {
