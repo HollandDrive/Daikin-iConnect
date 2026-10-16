@@ -4,5 +4,8 @@
   "main": "app.js",
   "dependencies": {
     "uuid": "^9.0.0"
+  },
+  "scripts": {
+    "test": "node test/floor.test.js"
   }
 }
